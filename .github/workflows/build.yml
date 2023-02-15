@@ -7,9 +7,12 @@ on:
     branches:
       - "**"
 
+env:
+  BRANCH_NAME_OR_RELEASE: ${{ startsWith(github.ref, 'refs/tags/v') && "release" || github.ref }}
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/v') }}
+  group: ${{ github.workflow }}-${{ BRANCH_NAME_OR_RELEASE }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/v')) }}
 
 jobs:
   build:
@@ -23,6 +26,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
+      - run: echo $BRANCH_NAME_OR_RELEASE
       - run: npm ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
